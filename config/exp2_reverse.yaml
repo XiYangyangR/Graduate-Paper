@@ -1,0 +1,36 @@
+# 反向模型：哈尼语 → 中文
+# 源语言（哈尼语）无标签，目标语言（中文）有标签 zho_Hans
+model:
+  name: "facebook/nllb-200-distilled-600M"   # 或本地路径
+  src_lang: null        # 哈尼语无标签，保持 null
+  tgt_lang: "zho_Hans"  # 中文加标签
+
+data:
+  train_src: "data/train.hani"
+  train_tgt: "data/train.zh"
+  valid_src: "data/valid.hani"
+  valid_tgt: "data/valid.zh"
+  test_src: "data/test.hani"
+  test_tgt: "data/test.zh"
+  max_length: 128
+
+training:
+  output_dir: "outputs/exp2_reverse"
+  num_train_epochs: 30
+  per_device_train_batch_size: 8
+  per_device_eval_batch_size: 8
+  gradient_accumulation_steps: 4
+  learning_rate: 3e-5
+  warmup_ratio: 0.1
+  weight_decay: 0.01
+  fp16: true
+  evaluation_strategy: "epoch"
+  save_strategy: "epoch"
+  save_total_limit: 3
+  logging_steps: 500
+  report_to: "tensorboard"
+  predict_with_generate: true
+
+evaluation:
+  metrics: ["sacrebleu", "chrf"]
+  test_batch_size: 16

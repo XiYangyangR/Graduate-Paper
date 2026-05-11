@@ -1,0 +1,9 @@
+torch>=2.0.0
+transformers>=4.36.0
+datasets>=2.14.0
+evaluate>=0.4.0
+sacrebleu>=2.4.0
+tensorboard
+pyyaml>=6.0
+easydict>=1.10
+tqdm>=4.65.0
