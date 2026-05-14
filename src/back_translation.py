@@ -9,8 +9,13 @@ from src.config_loader import load_config
 def generate_pseudo(reverse_model_path, mono_file, output_prefix, batch_size=32, max_length=128):
     model = AutoModelForSeq2SeqLM.from_pretrained(reverse_model_path)
     tokenizer = AutoTokenizer.from_pretrained(reverse_model_path)
+    
+    model.resize_token_embeddings(len(tokenizer))
+    
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device).eval()
+
+    forced_bos_token_id = tokenizer.convert_tokens_to_ids("zho_Hans")
     
     with open(mono_file, 'r', encoding='utf-8') as f:
         mono = [line.strip() for line in f if line.strip()]
@@ -21,7 +26,8 @@ def generate_pseudo(reverse_model_path, mono_file, output_prefix, batch_size=32,
         batch = mono[i:i+batch_size]
         encoded = tokenizer(batch, return_tensors="pt", padding=True, truncation=True, max_length=max_length).to(device)
         with torch.no_grad():
-            generated = model.generate(**encoded, max_length=max_length, num_beams=4)
+            generated = model.generate(**encoded, max_length=max_length, num_beams=4
+                                       , forced_bos_token_id=forced_bos_token_id)
         decoded = tokenizer.batch_decode(generated, skip_special_tokens=True)
         pseudo_zh.extend(decoded)
     

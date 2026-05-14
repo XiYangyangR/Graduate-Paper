@@ -3,7 +3,7 @@
 model:
   name: "facebook/nllb-200-distilled-600M"
   src_lang: "zho_Hans"  # 中文加标签
-  tgt_lang: null        # 哈尼语无标签
+  tgt_lang: "hani_Latn" # 哈尼语
 
 data:
   train_src: "augmented_data/merged/train.zh"

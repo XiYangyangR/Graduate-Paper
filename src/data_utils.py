@@ -10,22 +10,18 @@ def load_parallel_data(src_file, tgt_file):
     return Dataset.from_dict({"source": src_lines, "target": tgt_lines})
 
 def preprocess_function(examples, tokenizer, max_length, src_lang=None, tgt_lang=None):
-    """
-    如果 src_lang 不为 None，则在源句子前添加 "src_lang "
-    如果 tgt_lang 不为 None，则在目标句子前添加 "tgt_lang "
-    """
-    inputs = examples["source"]
-    if src_lang is not None:
-        inputs = [src_lang + " " + ex for ex in inputs]
+    if src_lang is not None and hasattr(tokenizer, "src_lang"):
+        tokenizer.src_lang = src_lang
+    if tgt_lang is not None and hasattr(tokenizer, "tgt_lang"):
+        tokenizer.tgt_lang = tgt_lang
     
-    targets = examples["target"]
-    if tgt_lang is not None:
-        targets = [tgt_lang + " " + ex for ex in targets]
-
-    model_inputs = tokenizer(inputs, max_length=max_length, truncation=True, padding="max_length")
-    with tokenizer.as_target_tokenizer():
-        labels = tokenizer(targets, max_length=max_length, truncation=True, padding="max_length")
-    model_inputs["labels"] = labels["input_ids"]
+    model_inputs = tokenizer(
+        examples["source"], 
+        text_target=examples["target"],
+        max_length=max_length,
+        truncation=True,
+        padding="max_length"
+    )
     return model_inputs
 
 def get_tokenized_datasets(config, include_test=False):

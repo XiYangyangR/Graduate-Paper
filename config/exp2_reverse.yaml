@@ -2,7 +2,7 @@
 # 源语言（哈尼语）无标签，目标语言（中文）有标签 zho_Hans
 model:
   name: "facebook/nllb-200-distilled-600M"   # 或本地路径
-  src_lang: null        # 哈尼语无标签，保持 null
+  src_lang: "hani_Latn"        # 哈尼语
   tgt_lang: "zho_Hans"  # 中文加标签
 
 data:

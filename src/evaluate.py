@@ -13,6 +13,9 @@ def evaluate_on_test(model_path, config, test_src_file, test_tgt_file, batch_siz
     print(f"加载模型: {model_path}")
     model = AutoModelForSeq2SeqLM.from_pretrained(model_path)
     tokenizer = AutoTokenizer.from_pretrained(model_path)
+    
+    model.resize_token_embeddings(len(tokenizer))
+    
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
     model.eval()
@@ -31,12 +34,15 @@ def evaluate_on_test(model_path, config, test_src_file, test_tgt_file, batch_siz
         input_ids = torch.tensor(processed["input_ids"]).to(device)
         attention_mask = torch.tensor(processed["attention_mask"]).to(device)
 
+        forced_bos_token_id = tokenizer.convert_tokens_to_ids(config.model.tgt_lang) 
         with torch.no_grad():
             generated_ids = model.generate(
                 input_ids=input_ids,
                 attention_mask=attention_mask,
                 max_length=config.data.max_length,
                 num_beams=4,
+                forced_bos_token_id=forced_bos_token_id
+
             )
         all_preds.append(generated_ids.cpu().numpy())
         all_labels.append(np.array(processed["labels"]))

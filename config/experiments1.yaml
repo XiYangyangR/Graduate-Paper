@@ -2,6 +2,7 @@
 model:
   name: "facebook/nllb-200-distilled-600M"   # 或 "facebook/mbart-large-50"
   src_lang: "zho_Hans"                       # 源语言标签（中文）
+  tgt_lang: "hani_Latn"                       # 目标语言标签（哈尼语）
 
 data:
   train_src: "data/train.zh"

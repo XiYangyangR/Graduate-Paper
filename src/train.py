@@ -19,6 +19,12 @@ def train(config):
     model = AutoModelForSeq2SeqLM.from_pretrained(config.model.name)
     tokenizer = AutoTokenizer.from_pretrained(config.model.name)
 
+    hani_token="hani_Latn"
+    if hani_token not in tokenizer.get_vocab():
+        print(f"Adding new token: {hani_token}")
+        tokenizer.add_special_tokens({'additional_special_tokens': [hani_token]})
+        model.resize_token_embeddings(len(tokenizer))
+
     tokenized_datasets, _ = get_tokenized_datasets(config, include_test=False)
 
     data_collator = DataCollatorForSeq2Seq(tokenizer, model=model)
@@ -40,6 +46,10 @@ def train(config):
         fp16=config.training.fp16 and torch.cuda.is_available(),
         report_to=config.training.report_to,
         warmup_ratio=config.training.get("warmup_ratio", 0.1),
+
+        load_best_model_at_end=True,
+        metric_for_best_model="bleu",
+        greater_is_better=True,
     )
 
     def wrapped_compute_metrics(eval_pred):
