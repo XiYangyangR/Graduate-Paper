@@ -49,6 +49,20 @@ def evaluate_on_test(model_path, config, test_src_file, test_tgt_file, batch_siz
 
     predictions = np.concatenate(all_preds, axis=0)
     labels = np.concatenate(all_labels, axis=0)
+
+    labels = np.where(labels != -100, labels, tokenizer.pad_token_id)
+
+    decode_preds = tokenizer.batch_decode(predictions, skip_special_tokens=True)
+    decode_labels = tokenizer.batch_decode(labels, skip_special_tokens=True)
+
+    output_file=os.path.join(model_path, "decoded_predictions.tsv")
+    with open(output_file, 'w', encoding='utf-8') as f:
+        f.write("Reference_Hani\tPredicted_Hani\n")
+        for ref, pred in zip(decode_labels, decode_preds):
+            f.write(f"{ref}\t{pred}\n")
+    print(f"翻译结果已保存至 {output_file}")
+
+
     eval_pred = (predictions, labels)
 
     metrics = compute_metrics(eval_pred, tokenizer)
