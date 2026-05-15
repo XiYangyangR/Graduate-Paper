@@ -8,13 +8,21 @@ from src.config_loader import load_config
 from src.data_utils import load_parallel_data, preprocess_function
 from src.metrics import compute_metrics
 import numpy as np
+from peft import PeftModel
 
 def evaluate_on_test(model_path, config, test_src_file, test_tgt_file, batch_size=16):
     print(f"加载模型: {model_path}")
-    model = AutoModelForSeq2SeqLM.from_pretrained(model_path)
-    tokenizer = AutoTokenizer.from_pretrained(model_path)
-    
-    model.resize_token_embeddings(len(tokenizer))
+    base_model = AutoModelForSeq2SeqLM.from_pretrained(config.model.name)
+    tokenizer = AutoTokenizer.from_pretrained(config.model.name)
+        
+    hani_token="hani_Latn"
+    if hani_token not in tokenizer.get_vocab():
+        print(f"正在为基础模型同步 Tokenizer: {hani_token}")
+        tokenizer.add_special_tokens({'additional_special_tokens': [hani_token]})
+    base_model.resize_token_embeddings(len(tokenizer))
+
+    print(f"正在加载 LoRA 权重补丁: {model_path}")
+    model = PeftModel.from_pretrained(base_model, model_path)
     
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)

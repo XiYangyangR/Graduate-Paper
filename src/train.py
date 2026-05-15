@@ -25,6 +25,25 @@ def train(config):
         tokenizer.add_special_tokens({'additional_special_tokens': [hani_token]})
         model.resize_token_embeddings(len(tokenizer))
 
+    #==================LORA==================
+    from peft import LoraConfig, get_peft_model, TaskType
+
+    peft_config=LoraConfig(
+        task_type=TaskType.SEQ_2_SEQ_LM,
+        inference_mode=False, 
+        r=8,               # 秩大小，8-16 即可
+        lora_alpha=32, 
+        lora_dropout=0.1,
+        # 针对 NLLB 架构，我们需要覆盖这些核心注意力层
+        target_modules=["q_proj", "v_proj", "k_proj", "out_proj"] 
+    )
+
+    model=get_peft_model(model, peft_config)
+    model.print_trainable_parameters()
+
+    #==================LORA==================
+
+
     tokenized_datasets, _ = get_tokenized_datasets(config, include_test=False)
 
     data_collator = DataCollatorForSeq2Seq(tokenizer, model=model)
@@ -70,6 +89,8 @@ def train(config):
     final_dir = os.path.join(config.training.output_dir, "final")
     model.save_pretrained(final_dir)
     tokenizer.save_pretrained(final_dir)
+
+    print(f"训练完成！LoRA 权重已保存至: {final_dir}")
 
     return trainer
 
