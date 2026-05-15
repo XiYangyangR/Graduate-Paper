@@ -31,7 +31,7 @@ def train(config):
 
     training_args = Seq2SeqTrainingArguments(
         output_dir=config.training.output_dir,
-        evaluation_strategy=config.training.evaluation_strategy,
+        eval_strategy=config.training.eval_strategy,
         save_strategy=config.training.save_strategy,
         learning_rate=config.training.learning_rate,
         per_device_train_batch_size=config.training.per_device_train_batch_size,

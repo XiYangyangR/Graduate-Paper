@@ -1,0 +1,15 @@
+# 忽略下载的大模型
+models/
+
+# 忽略训练输出和检查点
+outputs/
+
+# 忽略生成的大量伪语料数据（可选）
+augmented_data/
+
+# 忽略 Python 缓存文件
+__pycache__/
+*.pyc
+
+# 忽略环境配置
+.vscode/

@@ -23,8 +23,8 @@ training:
   learning_rate: 3e-5
   warmup_ratio: 0.1
   weight_decay: 0.01
-  fp16: true
-  evaluation_strategy: "epoch"
+  fp16: false
+  eval_strategy: "epoch"
   save_strategy: "epoch"
   save_total_limit: 3
   logging_steps: 500
