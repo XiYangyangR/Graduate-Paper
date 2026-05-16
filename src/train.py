@@ -31,11 +31,12 @@ def train(config):
     peft_config=LoraConfig(
         task_type=TaskType.SEQ_2_SEQ_LM,
         inference_mode=False, 
-        r=8,               # 秩大小，8-16 即可
+        r=16,               # 秩大小，8-16 即可
         lora_alpha=32, 
         lora_dropout=0.1,
         # 针对 NLLB 架构，我们需要覆盖这些核心注意力层
-        target_modules=["q_proj", "v_proj", "k_proj", "out_proj"] 
+        target_modules=["q_proj", "v_proj", "k_proj", "out_proj"],
+        modules_to_save=["embed_tokens", "lm_head"] 
     )
 
     model=get_peft_model(model, peft_config)

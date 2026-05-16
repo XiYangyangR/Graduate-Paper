@@ -36,7 +36,13 @@ def evaluate_on_test(model_path, config, test_src_file, test_tgt_file, batch_siz
     for i in tqdm(range(0, len(test_dataset), batch_size), desc="Evaluating on test set"):
         batch = test_dataset.select(range(i, min(i + batch_size, len(test_dataset))))
         processed = batch.map(
-            lambda x: preprocess_function(x, tokenizer, config.model.src_lang, config.data.max_length),
+            lambda x: preprocess_function(
+                x, 
+                tokenizer=tokenizer, 
+                max_length=config.data.max_length, 
+                src_lang=config.model.src_lang,
+                tgt_lang=config.model.tgt_lang
+            ),
             batched=True
         )
         input_ids = torch.tensor(processed["input_ids"]).to(device)
@@ -52,6 +58,13 @@ def evaluate_on_test(model_path, config, test_src_file, test_tgt_file, batch_siz
                 forced_bos_token_id=forced_bos_token_id
 
             )
+        
+        gen_numpy = generated_ids.cpu().numpy()
+        pad_len = config.data.max_length - gen_numpy.shape[1]
+        if pad_len > 0:
+            # 如果长度不足 max_length，在右侧用 pad_token_id 补齐
+            gen_numpy = np.pad(gen_numpy, ((0, 0), (0, pad_len)), constant_values=tokenizer.pad_token_id)
+
         all_preds.append(generated_ids.cpu().numpy())
         all_labels.append(np.array(processed["labels"]))
 

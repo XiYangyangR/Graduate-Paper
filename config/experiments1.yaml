@@ -15,11 +15,11 @@ data:
 
 training:
   output_dir: "outputs/exp1_nllb"
-  num_train_epochs: 20
-  per_device_train_batch_size: 32
-  per_device_eval_batch_size: 4
+  num_train_epochs: 30
+  per_device_train_batch_size: 128
+  per_device_eval_batch_size: 64
   gradient_accumulation_steps: 1
-  learning_rate: 0.00003
+  learning_rate: 0.00005
   warmup_ratio: 0.1
   weight_decay: 0.01
   fp16: true
@@ -32,4 +32,4 @@ training:
 
 evaluation:
   metrics: ["sacrebleu", "chrf"]
-  test_batch_size: 16
+  test_batch_size: 64
