@@ -24,6 +24,9 @@ def evaluate_on_test(model_path, config, test_src_file, test_tgt_file, batch_siz
     print(f"正在加载 LoRA 权重补丁: {model_path}")
     model = PeftModel.from_pretrained(base_model, model_path)
     
+    model = model.merge_and_unload()
+    model.tie_weights()  # 将权重转换为更高效的格式，节省内存和加速推理
+
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
     model.eval()
@@ -67,8 +70,20 @@ def evaluate_on_test(model_path, config, test_src_file, test_tgt_file, batch_siz
 
         all_preds.append(generated_ids.cpu().numpy())
         all_labels.append(np.array(processed["labels"]))
-
-    predictions = np.concatenate(all_preds, axis=0)
+    # 1. 动态找出所有预测结果中最长的那一个维度
+    max_pred_len = max(p.shape[1] for p in all_preds)
+    
+    # 2. 遍历所有 Batch，把不够长的统统补齐
+    aligned_preds = []
+    for p in all_preds:
+        pad_len = max_pred_len - p.shape[1]
+        if pad_len > 0:
+            # 防止 tokenizer.pad_token_id 为空的情况，提供保底值 0
+            pad_val = tokenizer.pad_token_id if tokenizer.pad_token_id is not None else 0
+            p = np.pad(p, ((0, 0), (0, pad_len)), constant_values=pad_val)
+        aligned_preds.append(p)
+        
+    predictions = np.concatenate(aligned_preds, axis=0)
     labels = np.concatenate(all_labels, axis=0)
 
     labels = np.where(labels != -100, labels, tokenizer.pad_token_id)

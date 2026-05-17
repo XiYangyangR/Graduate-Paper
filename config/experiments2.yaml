@@ -12,25 +12,25 @@ data:
   valid_tgt: "augmented_data/merged/valid.hani"
   test_src: "data/test.zh"
   test_tgt: "data/test.hani"
-  max_length: 128
+  max_length: 32
 
 training:
   output_dir: "outputs/exp2_forward"
   num_train_epochs: 30
-  per_device_train_batch_size: 8
-  per_device_eval_batch_size: 8
-  gradient_accumulation_steps: 4
-  learning_rate: 0.00003
+  per_device_train_batch_size: 128
+  per_device_eval_batch_size: 64
+  gradient_accumulation_steps: 1
+  learning_rate: 0.00005
   warmup_ratio: 0.1
   weight_decay: 0.01
   fp16: true
   eval_strategy: "epoch"
   save_strategy: "epoch"
   save_total_limit: 3
-  logging_steps: 500
+  logging_steps: 10
   report_to: "tensorboard"
   predict_with_generate: true
 
 evaluation:
   metrics: ["sacrebleu", "chrf"]
-  test_batch_size: 16
+  test_batch_size: 64

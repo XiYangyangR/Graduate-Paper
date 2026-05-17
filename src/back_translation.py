@@ -5,12 +5,13 @@ import torch
 from tqdm import tqdm
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 from src.config_loader import load_config
+from peft import PeftModel
 
-def generate_pseudo(reverse_model_path, mono_file, output_prefix, batch_size=32, max_length=128):
-    model = AutoModelForSeq2SeqLM.from_pretrained(reverse_model_path)
+def generate_pseudo(cfg,reverse_model_path, mono_file, output_prefix, batch_size=32, max_length=128):
     tokenizer = AutoTokenizer.from_pretrained(reverse_model_path)
-    
-    model.resize_token_embeddings(len(tokenizer))
+    base_model = AutoModelForSeq2SeqLM.from_pretrained(cfg.model.name)
+    base_model.resize_token_embeddings(len(tokenizer))
+    model = PeftModel.from_pretrained(base_model, reverse_model_path)
     
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device).eval()
@@ -67,7 +68,7 @@ if __name__ == "__main__":
     
     cfg = load_config(args.config)
     pseudo_zh, pseudo_hani = generate_pseudo(
-        args.model, args.mono, args.output_prefix,
+        cfg, args.model, args.mono, args.output_prefix,
         batch_size=args.batch_size, max_length=cfg.data.max_length
     )
     # 合并原始正向训练集（data/train.zh 和 data/train.hani）
