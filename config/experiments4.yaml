@@ -1,0 +1,30 @@
+model:
+  name: "facebook/nllb-200-distilled-600M"
+  src_lang: "zho_Hans"
+  tgt_lang: "hani_Latn"
+
+data:
+  train_src: "augmented_data/exp4_mc_merged/train.zh"
+  train_tgt: "augmented_data/exp4_mc_merged/train.hani"
+  valid_src: "data/valid.zh"
+  valid_tgt: "data/valid.hani"
+  test_src: "data/test.zh"
+  test_tgt: "data/test.hani"
+  max_length: 32
+
+training:
+  output_dir: "outputs/exp4_mc_final"
+  num_train_epochs: 30
+  per_device_train_batch_size: 128
+  per_device_eval_batch_size: 64
+  gradient_accumulation_steps: 1
+  learning_rate: 0.00005
+  fp16: true
+  save_strategy: "epoch"
+  save_total_limit: 1                    
+  load_best_model_at_end: true
+  metric_for_best_model: "bleu"
+
+evaluation:
+  metrics: ["sacrebleu", "chrf"]
+  test_batch_size: 64
