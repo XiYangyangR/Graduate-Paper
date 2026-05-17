@@ -1,0 +1,27 @@
+model:
+  name: "facebook/nllb-200-distilled-600M"
+  src_lang: "zho_Hans" 
+  tgt_lang: "hani_Latn" 
+data:
+  train_src: "data/train.zh"
+  train_tgt: "data/train.hani"
+  valid_src: "data/valid.zh"
+  valid_tgt: "data/valid.hani"
+  max_length: 32
+training:
+  output_dir: "outputs/exp3_fwd_seed44"  # 🔴 注意：每个种子的输出目录必须不同！(seed44就是 outputs/exp3_fwd_seed44)
+  seed: 44                               # 🔴 注意：设置不同的种子 (42, 43, 44)
+  num_train_epochs: 30
+  per_device_train_batch_size: 128
+  per_device_eval_batch_size: 64
+  gradient_accumulation_steps: 1
+  learning_rate: 0.00005
+  fp16: true
+  eval_strategy: "epoch"
+  save_strategy: "epoch"
+  save_total_limit: 1                    # 🔴 关键：只留1个最优，保护你的硬盘！
+  load_best_model_at_end: true
+  metric_for_best_model: "bleu"
+evaluation:
+  metrics: ["sacrebleu", "chrf"]
+  test_batch_size: 64

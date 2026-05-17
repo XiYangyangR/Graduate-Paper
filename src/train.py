@@ -14,7 +14,9 @@ from src.metrics import compute_metrics
 from src.utils import set_seed
 
 def train(config):
-    set_seed(42)
+    seed=getattr(config.training, "seed", 42) if hasattr(config.training, "seed") else 42
+    set_seed(seed)
+    print(f"当前使用随机种子: {seed}")
 
     model = AutoModelForSeq2SeqLM.from_pretrained(config.model.name)
     tokenizer = AutoTokenizer.from_pretrained(config.model.name)
